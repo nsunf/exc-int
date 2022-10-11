@@ -5,12 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const path_1 = __importDefault(require("path"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const app = (0, express_1.default)();
-app.set('PORT', 5000);
+app.use(express_1.default.static(path_1.default.resolve(__dirname, '../../client/build')));
 app.get('/', (req, res) => {
-    console.log('hahaha');
     res.sendFile(path_1.default.resolve(__dirname, '../../client/build/index.html'));
 });
-app.listen(app.get('PORT'), () => {
-    console.log('express server is running on port ' + app.get('PORT'));
+app.listen(process.env.PORT, () => {
+    console.log('express server is running on port ' + process.env.PORT);
 });
