@@ -18,9 +18,10 @@ const ItemName = styled.span`
   padding-left: 8px;
 `;
 
-const SelectedBlock = styled.div`
-  width: 10px;
+const SelectedBlock = styled.div<{ selected: boolean }>`
+  width: ${({ selected }) => selected ? "10px" : "0px"};
   background: ${({ theme }) => theme.color.main};
+  transition: 250ms ease-out;
 `;
 
 interface NavItemProps {
@@ -44,10 +45,7 @@ function NavItem({ name, imgSrc, selected }: NavItemProps) {
           alt={name.eng + selected ? "enable" : "disable"}
         />
         <ItemName>{name.ko}</ItemName>
-        {selected ?
-          <SelectedBlock></SelectedBlock>
-          : null
-        }
+        <SelectedBlock selected={selected}></SelectedBlock>
       </Link>
     </NavItemBlock>
   )
