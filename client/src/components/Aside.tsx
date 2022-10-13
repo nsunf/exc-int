@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 import Logo from "./Logo";
-import Nav from "./Nav";
+import NavContainer from "../containers/NavContainer";
 
 const AsideBlock = styled.div`
   width: 20%;
@@ -17,7 +17,7 @@ function Aside() {
   return (
     <AsideBlock>
       <Logo />
-      <Nav />
+      <NavContainer />
     </AsideBlock>
   )
 }
