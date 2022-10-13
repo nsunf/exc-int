@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 const ExchangeItemBlock = styled.li`
@@ -5,14 +6,24 @@ const ExchangeItemBlock = styled.li`
   flex-basis: 0;
   list-style: none;
 
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
   border-bottom: 2px solid ${({ theme }) => theme.color.subBackground};
+
+  cursor: pointer;
 
   &:last-of-type {
     border: none;
+  }
+
+  a {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    text-decoration: none;
+    color: black;
+    &:hover>div:not(:last-child) {
+      color: ${({ theme }) => theme.color.main};
+    }
   }
 `;
 
@@ -24,6 +35,7 @@ const Flag = styled.img`
 const Name = styled.div`
   flex-grow: 1;
   margin-left: 10px;
+  font-weight: 600;
 `;
 
 const BasicRate = styled.div`
@@ -50,7 +62,7 @@ function ExchangeItem({ exchange }: ExchangeItemProps) {
   return (
     <ExchangeItemBlock>
       {exchange ? (
-        <>
+        <Link to={"/exchange/" + exchange.cur_unit}>
           <Flag
             src={`${process.env.PUBLIC_URL}/icon/flag/${exchange.flag}.png`}
             alt={exchange.flag}
@@ -62,7 +74,7 @@ function ExchangeItem({ exchange }: ExchangeItemProps) {
           <FluctuationRate isIncreased={exchange.fluc_r >= 0}>
             {exchange.fluc_r * 100 + "%"}
           </FluctuationRate>
-        </>
+        </Link>
       ) : null}
     </ExchangeItemBlock>
   );
