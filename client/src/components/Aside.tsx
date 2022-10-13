@@ -4,8 +4,9 @@ import Logo from "./Logo";
 import Nav from "./Nav";
 
 const AsideBlock = styled.div`
-  width: 180px;
+  width: 20%;
   height: 100%;
+  max-width: 200px;
 
   background: ${({ theme }) => theme.color.subBackground};
 
