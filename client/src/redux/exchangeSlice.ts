@@ -1,16 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import data from "../dummyData/exchange.json";
-
-const encodedData = data as Exchange[];
+import usData from "../dummyData/usExchange.json";
 
 interface ExchangeState {
   todays: Exchange[];
-  selected: string|null;
+  selected: ExchangeDetail|null;
 }
 
 const initialState: ExchangeState = {
-  todays: [...encodedData],
-  selected: null
+  todays: data as Exchange[],
+  selected: {
+    info: data[data.length - 1],
+    deal_bas_r_arr: usData
+  } as ExchangeDetail
 };
 
 const exchangeSlice = createSlice({
@@ -19,10 +21,12 @@ const exchangeSlice = createSlice({
   reducers: {
     selectExchange: (state, action: PayloadAction<string>) => {
       const filteredExchange = state.todays.filter(exc => exc.cur_unit === action.payload);
-      if (filteredExchange.length !== 1)
-        state.selected = action.payload;
-      else
+      if (filteredExchange.length !== 1) {
+        // state.selected.unit = action.payload;
+        // state.selected = 
+      } else {
         state.selected = null;
+      }
     },
     deselectExchange: (state) => {
       state.selected = null;
