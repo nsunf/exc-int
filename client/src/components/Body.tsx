@@ -3,7 +3,9 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 
 import styled from "styled-components";
+
 import ExchangeContainer from "../containers/ExchangeContainer";
+import ExchangeDetailContainer from "../containers/ExchangeDetailContainer";
 
 const BodyBlock = styled(TransitionGroup)`
   flex-grow: 1;
@@ -32,11 +34,11 @@ function Body() {
   const ref = useRef(null);
   return (
     <BodyBlock>
-      <CSSTransition nodeRef={ref} key={location.key} classNames="body-transition" timeout={200}>
+      <CSSTransition nodeRef={ref} key={location.key} classNames="body-transition" timeout={1000}>
         <TransitionWrapper ref={ref}>
-          <Routes location={location}>
+          <Routes>
             <Route path="/*" element={<ExchangeContainer />} />
-            <Route path="/exchange/:unit" element={<></>} />
+            <Route path="/exchange/:unit" element={<ExchangeDetailContainer />} />
             <Route path="/interest" element={<></>} />
             <Route path="/international" element={<></>} />
           </Routes>
