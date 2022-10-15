@@ -13,6 +13,7 @@ const ExchangeBlock = styled.div`
   gap: 20px;
 
   @media (max-width: 1180px) {
+    margin: 5% 0;
     align-items: flex-start;
   }
 `;

@@ -15,6 +15,7 @@ const ExchangeItemBlock = styled.li`
   }
 
   a {
+    height: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;

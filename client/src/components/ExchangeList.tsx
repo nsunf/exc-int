@@ -5,7 +5,8 @@ import styled from "styled-components";
 
 const ExchangeListBlock = styled.div`
   width: 42%;
-  min-height: 90%;
+  height: 90%;
+  max-height: 640px;
 
   box-sizing: border-box;
   padding: 6px 10px;
@@ -20,7 +21,10 @@ const ExchangeListBlock = styled.div`
 
   @media (max-width: 1180px) {
     width: 60%;
+    height: initial;
     margin: 24px 0;
+    min-height: 90%;
+    max-height: initial;
   }
 `;
 
