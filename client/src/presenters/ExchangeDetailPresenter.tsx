@@ -12,8 +12,6 @@ const ExchangeDetailPresenterBlock = styled.div`
 
 const BodyWrap = styled.div`
   flex-grow: 1;
-  box-sizing: border-box;
-  border: 1px solid black;
 
   display: flex;
 `;

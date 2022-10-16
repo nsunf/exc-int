@@ -1,11 +1,14 @@
 import { useEffect, useRef } from "react";
+import Graph from "../canvas/Graph";
 import GraphPresenter from "../presenters/GraphPresenter";
+import { useAppSelector } from "../redux/hooks";
 
 function GraphContainer() {
+  // 년 월 주 선택 버튼 만들기
   const canvasWrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const dots: Dot[] = [];
+  const dealBasData = useAppSelector(state => state.exchange.selected?.deal_bas_r_arr ?? []);
 
   useEffect(() => {
     const canvasWrap = canvasWrapRef.current;
@@ -13,22 +16,28 @@ function GraphContainer() {
     const ctx = canvas?.getContext('2d');
     if (!canvasWrap || !canvas || !ctx) return;
 
+    let graph = new Graph(canvas.width/2, canvas.height/2, canvas.width*0.8, canvas.height * 0.5, dealBasData);
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      graph.update(ctx);
+    };
+
     const resize = () => {
       canvas.width = canvasWrap.clientWidth;
       canvas.height = canvasWrap.clientHeight;
-    }
+    };
+
+    const interval = setInterval(animate, 1000/60);
+    resize();
     window.addEventListener('resize', resize);
-
-
-    const interval = setInterval(() => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }, 1000 / 30);
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('resize', resize);
     }
-  }, []);
+  }, [dealBasData])
+
 
   return (
     <GraphPresenter
@@ -39,55 +48,3 @@ function GraphContainer() {
 }
 
 export default GraphContainer;
-
-class Dot {
-  public x: number;
-  public y: number;
-  private r: number;
-  private fillColor: string;
-  private strokeColor: string;
-  constructor(x: number, y: number, r: number) {
-    this.x = x;
-    this.y = y;
-    this.r = r;
-    this.fillColor = '#000';
-    this.strokeColor = "#477CFF";
-  }
-  draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = this.fillColor;
-    ctx.strokeStyle = this.strokeColor;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-  }
-  update(ctx: CanvasRenderingContext2D) {
-    this.draw(ctx);
-  }
-}
-
-class Line {
-  private dots: Dot[];
-  private height: number;
-
-  constructor(dots: Dot[], height: number) {
-    this.dots = dots;
-    this.height = height;
-  }
-
-  getCenter(x1: number, y1: number, x2: number, y2: number) {
-    return { x: (x2 + x1)/2, y: (y2 + y1)/2 };
-  }
-
-  draw(ctx: CanvasRenderingContext2D) {
-    let prevX = this.dots[0].x;
-    let prevY = this.dots[0].y;
-    ctx.moveTo(prevX, prevY);
-  }
-
-  update(ctx: CanvasRenderingContext2D) {
-    this.draw(ctx);
-  }
-}
