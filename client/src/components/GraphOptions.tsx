@@ -1,4 +1,5 @@
-import styled from "styled-components";
+import { lighten, darken } from "polished";
+import styled, { css } from "styled-components";
 
 const OptionButtonBlock = styled.div`
   width: 33.333%;
@@ -11,17 +12,32 @@ const OptionButtonBlock = styled.div`
 
 const StyledButton = styled.input<{ selected: boolean }>`
   width: 100%;
+  padding: 2px 8px;
   border: none;
+  box-sizing: border-box;
+  font-size: 14px;
+  cursor: pointer;
 
-  ${({ theme, selected }) => selected ? `
-      color: white;
-      background: ${theme.color.main};
-    ` :
-    `
-      color: ${theme.color.gray1};
-      background: ${theme.color.subBackground};
-    `
-  }
+  ${({ theme, selected }) => {
+    if (selected) {
+      return css`
+        color: white;
+        background: ${theme.color.main};
+      `
+    } else {
+      return css`
+        color: ${theme.color.gray1};
+        background: ${theme.color.subBackground};
+        &:hover {
+          background: ${lighten(0.1, theme.color.main)};
+          color: white;
+        }
+        &:active {
+          background: ${darken(0.05, theme.color.main)};
+        }
+      `
+    }
+  }}
 `;
 
 interface OptionButtonProps {
