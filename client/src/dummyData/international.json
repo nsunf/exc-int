@@ -1,0 +1,47 @@
+[
+  {
+    "cur_fund": "USD",
+    "sfln_intrc_nm": "5년이하",
+    "int_r": "4.88"
+  },
+  {
+    "cur_fund": "USD",
+    "sfln_intrc_nm": "5년초과8.5년이하",
+    "int_r": "4.7"
+  },
+  {
+    "cur_fund": "USD",
+    "sfln_intrc_nm": "8.5년초과",
+    "int_r": "4.64"
+  },
+  {
+    "cur_fund": "EUR",
+    "sfln_intrc_nm": "5년이하",
+    "int_r": "2.45"
+  },
+  {
+    "cur_fund": "EUR",
+    "sfln_intrc_nm": "5년초과8.5년이하",
+    "int_r": "2.62"
+  },
+  {
+    "cur_fund": "EUR",
+    "sfln_intrc_nm": "8.5년초과",
+    "int_r": "2.72"
+  },
+  {
+    "cur_fund": "JPY",
+    "sfln_intrc_nm": "5년이하",
+    "int_r": "0.94"
+  },
+  {
+    "cur_fund": "JPY",
+    "sfln_intrc_nm": "5년초과8.5년이하",
+    "int_r": "1.05"
+  },
+  {
+    "cur_fund": "JPY",
+    "sfln_intrc_nm": "8.5년초과",
+    "int_r": "1.17"
+  }
+]

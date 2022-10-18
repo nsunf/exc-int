@@ -17,7 +17,10 @@ const theme = {
     background: "#FFF",
     subBackground: "#DEE1EC",
     gray1: "#ADADAD",
-    gray2: "#85878E"
+    gray2: "#85878E",
+    blue1: "#477CFF",
+    blue2: "#2E4FA3",
+    blue3: "#253F82"
   }
 }
 

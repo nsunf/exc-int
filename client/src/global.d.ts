@@ -23,3 +23,9 @@ interface Interest {
   sfln_intrc_nm: string;
   int_r: string;
 }
+
+interface International {
+  cur_fund: string;
+  sfln_intrc_nm: string;
+  int_r: string
+}
