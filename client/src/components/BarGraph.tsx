@@ -34,6 +34,7 @@ const Box = styled.div<{ animationStart: boolean, width: number }>`
   width: 0px;
   height: 20px;
   background: ${({ theme }) => theme.color.main};
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
 
   transition: 2s;
 
