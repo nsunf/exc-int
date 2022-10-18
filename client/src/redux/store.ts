@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import exchangeReducer from "./exchangeSlice";
+import interestReducer from "./interestSlice";
 
 const store = configureStore({
   reducer: {
-    exchange: exchangeReducer
+    exchange: exchangeReducer,
+    interest: interestReducer
   }
 });
 

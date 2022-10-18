@@ -17,3 +17,9 @@ interface ExchangeDetail {
 }
 
 type GraphMode = 'Year'|'Month'|'Week';
+
+interface Interest {
+  result: number;
+  sfln_intrc_nm: string;
+  int_r: string;
+}

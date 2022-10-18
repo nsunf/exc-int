@@ -6,6 +6,7 @@ import styled from "styled-components";
 
 import ExchangeContainer from "../containers/ExchangeContainer";
 import ExchangeDetailContainer from "../containers/ExchangeDetailContainer";
+import InterestContainer from "../containers/InterestContainer";
 
 const BodyBlock = styled(TransitionGroup)`
   flex-grow: 1;
@@ -39,7 +40,7 @@ function Body() {
           <Routes>
             <Route path="/*" element={<ExchangeContainer />} />
             <Route path="/exchange/:unit" element={<ExchangeDetailContainer />} />
-            <Route path="/interest" element={<></>} />
+            <Route path="/interest" element={<InterestContainer />} />
             <Route path="/international" element={<></>} />
           </Routes>
         </TransitionWrapper>
