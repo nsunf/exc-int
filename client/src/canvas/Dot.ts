@@ -2,6 +2,7 @@ class Dot {
   public x: number;
   public y: number;
   private cy: number;
+  private datePosY: number;
 
   private r: number;
 
@@ -14,10 +15,11 @@ class Dot {
   private timer?: NodeJS.Timeout;
   private animationReady = false;
 
-  constructor(x: number, y: number, r: number, val: string, date: string) {
+  constructor(x: number, y: number, r: number, val: string, date: string, datePosY: number) {
     this.x = x;
     this.y = 200;
     this.cy = y;
+    this.datePosY = datePosY;
 
     this.r = r;
 
@@ -46,7 +48,7 @@ class Dot {
     ctx.textAlign = "center";
     ctx.font = '15px san serif';
     ctx.fillText(this.val, this.x, this.y - 40);
-    ctx.fillText(this.date, this.x, 400);
+    ctx.fillText(this.date, this.x, this.datePosY);
   }
 
   update(ctx: CanvasRenderingContext2D) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import CalculatorPresenter from "../presenters/CalculatorPresenter";
 import { useAppSelector } from "../redux/hooks";
 
@@ -21,6 +21,11 @@ const initialState: StateProps = {
 function CalculatorContainer() {
   const exchangeInfo = useAppSelector(state => state.exchange.selected?.info);
   const [state, setState] = useState(initialState);
+  const [input, setInput] = useState("1000");
+
+  const onInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  }, [])
 
   useEffect(() => {
     if (!exchangeInfo) return;
@@ -46,6 +51,8 @@ function CalculatorContainer() {
       unitKo={state.unitKo}
       unitEn={state.unitEn}
       deal_bas_r={state.deal_bas_r}
+      input={input}
+      onInputChange={onInputChange}
     />
   )
 }

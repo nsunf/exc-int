@@ -15,3 +15,5 @@ interface ExchangeDetail {
   info: Exchange;
   deal_bas_r_arr: ExchangeDealBas[];
 }
+
+type GraphMode = 'Year'|'Month'|'Week';

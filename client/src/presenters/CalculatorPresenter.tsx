@@ -1,12 +1,10 @@
 import styled from "styled-components";
 
 import { FaExchangeAlt } from "react-icons/fa";
+import { ChangeEvent } from "react";
 
 const CalculatorPresenterBlock = styled.div`
-  width: 320px;
-
-  border: 1px solid blue;
-  box-sizing: border-box;
+  width: 400px;
 
   display: flex;
   justify-content: center;
@@ -20,8 +18,8 @@ const CardBlock = styled.div`
   align-items: center;
   gap: 40px;
 
-  width: 90%;
-  height: 80%;
+  width: 75%;
+  height: 75%;
   border-radius: 16px;
 
   box-shadow: 2px 2px 16px 4px rgba(0, 0, 0, 0.25);
@@ -108,9 +106,11 @@ interface CalculatorPresenterProps {
   unitKo: string;
   unitEn: string;
   deal_bas_r: string;
+  input: string;
+  onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-function CalculatorPresenter({ imgSrc, countryName, unitKo, unitEn, deal_bas_r }: CalculatorPresenterProps) {
+function CalculatorPresenter({ imgSrc, countryName, unitKo, unitEn, deal_bas_r, input, onInputChange }: CalculatorPresenterProps) {
   return (
     <CalculatorPresenterBlock>
       <CardBlock>
@@ -123,12 +123,12 @@ function CalculatorPresenter({ imgSrc, countryName, unitKo, unitEn, deal_bas_r }
         </CardHeader>
         <CardBody>
           <InputBox>
-            <input type="number" value="1"/>
+            <input type="number" value={input} onChange={onInputChange} />
             <span>원</span>
           </InputBox>
           <ExchangeIcon />
           <InputBox>
-            <input type="number" value={parseFloat(deal_bas_r.replace(',', ''))} disabled/>
+            <input type="number" value={Number(deal_bas_r.replace(',', '')) * Number(input) * 0.001} disabled/>
             <span>{unitKo}</span>
           </InputBox>
         </CardBody>

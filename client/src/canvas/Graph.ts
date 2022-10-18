@@ -53,7 +53,7 @@ class Graph {
       const x = this.minPos.x + xOffset * i;
       const y = this.maxPos.y - (this.height - dotRangeLength) - py;
 
-      reuslt.push(new Dot(x, y, 6, dealBas.deal_bas_r, dealBas.date));
+      reuslt.push(new Dot(x, y, 6, dealBas.deal_bas_r, dealBas.date, this.maxPos.y + 20));
     })
 
     return reuslt;

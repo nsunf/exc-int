@@ -6,6 +6,8 @@ import Body from "./components/Body";
 const AppBlock = styled.div`
   width: 90vw;
   height: 80vh;
+  min-height: 550px;
+  min-width: 880px;
   max-width: 1180px; 
   margin: 10vh auto;
 

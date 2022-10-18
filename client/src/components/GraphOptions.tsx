@@ -43,12 +43,13 @@ const StyledButton = styled.input<{ selected: boolean }>`
 interface OptionButtonProps {
   text: string;
   selected: boolean;
+  onClick: () => void;
 }
 
-function OptionButton({ text, selected }: OptionButtonProps) {
+function OptionButton({ text, selected, onClick }: OptionButtonProps) {
   return (
     <OptionButtonBlock >
-      <StyledButton type="button" value={text} selected={selected} />
+      <StyledButton type="button" value={text} selected={selected} onClick={onClick} />
     </OptionButtonBlock>
   )
 }
@@ -67,13 +68,18 @@ const ButtnWrap = styled.div`
   border-radius: 10px;
 `;
 
-function GraphOptions() {
+interface GraphOptionsProps {
+  mode: GraphMode;
+  onClickMode: (mode: GraphMode) => void;
+}
+
+function GraphOptions({ mode, onClickMode }: GraphOptionsProps) {
   return (
     <GraphOptionsBlock>
       <ButtnWrap>
-        <OptionButton text="1년" selected={false}/>
-        <OptionButton text="1개월" selected={false}/>
-        <OptionButton text="1주일" selected={true}/>
+        <OptionButton text="1년" selected={mode === "Year"} onClick={() => onClickMode("Year") } />
+        <OptionButton text="1개월" selected={mode === "Month"} onClick={() => onClickMode("Month")}/>
+        <OptionButton text="1주일" selected={mode === "Week"} onClick={() => onClickMode("Week")} />
       </ButtnWrap>
     </GraphOptionsBlock>
   )
