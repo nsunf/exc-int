@@ -1,8 +1,9 @@
 import styled from "styled-components";
+import useAnimationTimer from "../hooks/useAnimationTimer";
 
 
-const BarBlock = styled.div`
-  height: 100px;
+const BarBlock = styled.div<{ animationStarted: boolean, value: number }>`
+  height: 0px;
   width: 40px;
   margin: 0 4px;
   display: flex;
@@ -24,6 +25,11 @@ const BarBlock = styled.div`
     color: white;
     margin: 2px 0;
   }
+
+  transition: 1500ms 250ms;
+
+  ${({ animationStarted, value }) =>
+    animationStarted ? `height: ${value * 50}px` : ''};
 `;
 
 interface BarProps {
@@ -31,8 +37,10 @@ interface BarProps {
 }
 
 function Bar({ value }: BarProps) {
+  const animationStarted = useAnimationTimer();
+
   return (
-    <BarBlock>
+    <BarBlock animationStarted={animationStarted} value={value}>
       <span>{value}</span>
     </BarBlock>
   )
@@ -51,6 +59,7 @@ const BarWrap = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
+  align-items: flex-end;
 `;
 
 const Label = styled.div`

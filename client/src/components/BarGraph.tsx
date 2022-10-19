@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { useState, useEffect } from "react";
+import useAnimationTimer from "../hooks/useAnimationTimer";
 
 const BarBlock = styled.div`
   display: flex;
@@ -30,15 +31,15 @@ const Wrap = styled.div`
   align-items: center;
 `;
 
-const Box = styled.div<{ animationStart: boolean, width: number }>`
+const Box = styled.div<{ animationStarted: boolean, width: number }>`
   width: 0px;
   height: 20px;
   background: ${({ theme }) => theme.color.main};
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
 
-  transition: 2s;
+  transition: 1500ms 250ms;
 
-  ${({ animationStart, width }) => animationStart ? `
+  ${({ animationStarted, width }) => animationStarted ? `
     width: ${width}px;
   ` : ''}
 `;
@@ -53,16 +54,7 @@ interface BarProps {
 }
 
 function Bar({ interest }: BarProps) {
-  const [animationStart, setAnimationStart] = useState(false);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimationStart(true);
-    }, 1000);
-    return () => {
-      clearTimeout(timer);
-    }
-  }, [])
+  const animationStarted = useAnimationTimer();
 
   return (
     <BarBlock>
@@ -70,7 +62,7 @@ function Bar({ interest }: BarProps) {
         <span>{interest.sfln_intrc_nm.slice(10)}</span>
       </Label>
       <Wrap>
-        <Box animationStart={animationStart} width={Number(interest.int_r) * 50}></Box>
+        <Box animationStarted={animationStarted} width={Number(interest.int_r) * 50}></Box>
         <ValueLabel>{interest.int_r}%</ValueLabel>
       </Wrap>
     </BarBlock>

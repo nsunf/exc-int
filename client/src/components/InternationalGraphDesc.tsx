@@ -47,7 +47,7 @@ function Description({ text }: DescriptionProps) {
 }
 
 const InternationalGraphDescBlock = styled.div`
-  margin: 16px;
+  margin: 32px;
 `;
 
 function InternationalGraphDesc() {
