@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDateStr = void 0;
-function getDateStr(date) {
+function getDateStr(date, widthHyphen = false) {
     const y = date.getFullYear();
     const m = date.getMonth() + 1;
     const d = date.getDate();
@@ -10,7 +10,7 @@ function getDateStr(date) {
     let dStr = d.toString();
     mStr = mStr.length === 1 ? "0" + mStr : mStr;
     dStr = dStr.length === 1 ? "0" + dStr : dStr;
-    const dateStr = `${yStr}${mStr}${dStr}`;
+    const dateStr = widthHyphen ? `${yStr}-${mStr}-${dStr}` : `${yStr}${mStr}${dStr}`;
     return dateStr;
 }
 exports.getDateStr = getDateStr;

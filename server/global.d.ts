@@ -1,3 +1,10 @@
+interface Api_History {
+  exchange: boolean | null;
+  interest: boolean | null;
+  international: boolean | null;
+  date: Date;
+}
+
 interface RawExchange {
   result: number;
   cur_unit: string;
@@ -25,11 +32,13 @@ interface RawInterest {
   int_r: string;
 }
 
+interface CIRR {
+  cur_fund: string;
+  sfln_intrc_nm: string;
+  int_r: string;
+}
+
 interface RawInternational {
   result: number;
-  cirr_list: {
-    cur_fund: string;
-    sfln_intrc_nm: string;
-    int_r: string;
-  }[];
+  cirr_list: CIRR[];
 }
