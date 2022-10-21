@@ -5,17 +5,13 @@ import { getDateStr } from '../utils/date';
 dotenv.config();
 
 class BankAPI {
-  // https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=mPkhHInmDpSzkYMVAex0wnj3ZW8Imq61&data=AP01
-  // https://www.koreaexim.go.kr/site/program/financial/interestJSON?authkey=G1Bo3CZkToDgfvd9dRrpU4jSdvxVO0S3&data=AP02
-  // https://www.koreaexim.go.kr/site/program/financial/internationalJSON?authkey=qn5ACltUfDchAgUdyVo5Z2FNnhiHtbPl&data=AP03
-
   static url = "https://www.koreaexim.go.kr/site/program/financial/";
 
   constructor() {
 
   }
 
-  async getExchange(date: Date = new Date()): Promise<RawExchange[]> {
+  async getExchange(date: Date = new Date()): Promise<Exchange[]> {
     const response = await axios({
       url: BankAPI.url + "exchangeJSON",
       params: {
@@ -28,7 +24,7 @@ class BankAPI {
     return response.data;
   }
 
-  async getInterest(date: Date = new Date()): Promise<RawInterest[]> {
+  async getInterest(date: Date = new Date()): Promise<Interest[]> {
     const response = await axios({
       url: BankAPI.url + "interestJSON",
       params: {

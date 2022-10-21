@@ -50,44 +50,50 @@ class DB {
             }
         });
     }
-    checkExchange(date) {
+    setHistory({ exchange, interest, international }, date) {
         return __awaiter(this, void 0, void 0, function* () {
             const dateStr = (0, date_1.getDateStr)(date);
-            const response = yield this.pool.query(`
-      SELECT * FROM exchange
+            const history = yield this.checkHistory(date);
+            const boolToStr = (bool) => {
+                switch (bool) {
+                    case null:
+                        return 'NULL';
+                    case true:
+                        return 'true';
+                    case false:
+                        return 'false';
+                }
+            };
+            yield this.pool.query(`
+      UPDATE api_history
+      SET exchange = ${boolToStr(exchange == undefined ? history.exchange : exchange)},
+      interest = ${boolToStr(interest == undefined ? history.interest : interest)},
+      international = ${boolToStr(international == undefined ? history.international : international)}
       WHERE date = '${dateStr}';
     `);
-            return response[0].length > 0;
-        });
-    }
-    checkInterest() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const dateStr = (0, date_1.getDateStr)(new Date());
-            const response = yield this.pool.query(`
-      SELECT * FROM interest
-      WHERE date = '${dateStr}';
-    `);
-            return response[0].length > 0;
-        });
-    }
-    checkInternational() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const dateStr = (0, date_1.getDateStr)(new Date());
-            const response = yield this.pool.query(`
-      SELECT * FROM international
-      WHERE date = '${dateStr}';
-    `);
-            return response[0].length > 0;
         });
     }
     getExchanges(date) {
         return __awaiter(this, void 0, void 0, function* () {
             const dateStr = (0, date_1.getDateStr)(date);
             const response = yield this.pool.query(`
-      SELECT * FROM exchange
+      SELECT flag.flag, exchange.cur_unit, deal_bas_r, cur_nm, date FROM exchange
+      LEFT JOIN flag ON flag.cur_unit = exchange.cur_unit
       WHERE date = '${dateStr}';
     `);
-            return response[0];
+            const result = response[0];
+            return result;
+        });
+    }
+    getInterest(date) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const dateStr = (0, date_1.getDateStr)(date);
+            const response = yield this.pool.query(`
+      SELECT * FROM interest
+      WHERE date = '${dateStr}';
+    `);
+            const result = response[0];
+            return result;
         });
     }
     setExchanges(exchanges, date) {

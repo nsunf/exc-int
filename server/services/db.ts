@@ -40,48 +40,61 @@ class DB {
     }
   }
 
-  async checkExchange(date: Date): Promise<boolean> {
+  async setHistory({ exchange, interest, international }: { exchange?: boolean, interest?: boolean, international?: boolean}, date: Date) {
+    const dateStr = getDateStr(date);
+
+    const history = await this.checkHistory(date);
+
+    const boolToStr = (bool: boolean|null) => {
+      switch (bool) {
+        case null :
+          return 'NULL';
+        case true :
+          return 'true';
+        case false:
+          return 'false';
+      }
+    }
+
+    await this.pool.query(`
+      UPDATE api_history
+      SET exchange = ${boolToStr(exchange == undefined ? history.exchange : exchange)},
+      interest = ${boolToStr(interest == undefined ? history.interest : interest)},
+      international = ${boolToStr(international == undefined ? history.international : international)}
+      WHERE date = '${dateStr}';
+    `);
+  }
+
+  async getExchanges(date: Date): Promise<Exchange[]> {
     const dateStr = getDateStr(date);
 
     const response = await this.pool.query(`
-      SELECT * FROM exchange
+      SELECT flag.flag, exchange.cur_unit, deal_bas_r, cur_nm, date FROM exchange
+      LEFT JOIN flag ON flag.cur_unit = exchange.cur_unit
       WHERE date = '${dateStr}';
     `) as mysql.RowDataPacket[][];
-    return response[0].length > 0;
+
+    const result = response[0] as Exchange[];
+
+    return result;
   }
 
-  async checkInterest(): Promise<boolean> {
-    const dateStr = getDateStr(new Date());
+  async getInterest(date: Date): Promise<Interest[]> {
+    const dateStr = getDateStr(date);
 
     const response = await this.pool.query(`
       SELECT * FROM interest
       WHERE date = '${dateStr}';
     `) as mysql.RowDataPacket[][];
-    return response[0].length > 0;
+
+    const result = response[0] as Interest[];
+
+    return result;
   }
 
-  async checkInternational(): Promise<boolean> {
-    const dateStr = getDateStr(new Date());
 
-    const response = await this.pool.query(`
-      SELECT * FROM international
-      WHERE date = '${dateStr}';
-    `) as mysql.RowDataPacket[][];
-    return response[0].length > 0;
-  }
 
-  async getExchanges(date: Date): Promise<mysql.RowDataPacket[]> {
-    const dateStr = getDateStr(date);
-
-    const response = await this.pool.query(`
-      SELECT * FROM exchange
-      WHERE date = '${dateStr}';
-    `) as mysql.RowDataPacket[][];
-
-    return response[0];
-  }
-
-  async setExchanges(exchanges: RawExchange[], date: Date) {
+  async setExchanges(exchanges: Exchange[], date: Date) {
     const dateStr = getDateStr(date);
 
     const numOfJob = exchanges.length;
@@ -98,7 +111,7 @@ class DB {
     })
   }
 
-  async setInterest(interests: RawInterest[], date: Date) {
+  async setInterest(interests: Interest[], date: Date) {
     const dateStr = getDateStr(date);
 
     const numOfJob = interests.length;

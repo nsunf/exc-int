@@ -59,8 +59,5 @@ class BankAPI {
         });
     }
 }
-// https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=mPkhHInmDpSzkYMVAex0wnj3ZW8Imq61&data=AP01
-// https://www.koreaexim.go.kr/site/program/financial/interestJSON?authkey=G1Bo3CZkToDgfvd9dRrpU4jSdvxVO0S3&data=AP02
-// https://www.koreaexim.go.kr/site/program/financial/internationalJSON?authkey=qn5ACltUfDchAgUdyVo5Z2FNnhiHtbPl&data=AP03
 BankAPI.url = "https://www.koreaexim.go.kr/site/program/financial/";
 exports.default = BankAPI;
