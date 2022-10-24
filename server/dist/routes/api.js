@@ -49,7 +49,7 @@ function getInterests(date) {
                 yield db.setHistory({ interest: interests.length > 0 }, date);
                 result = interests;
             }
-            else if (historyCheck.exchange == true) {
+            else if (historyCheck.interest == true) {
                 let interests = yield db.getInterest(date);
                 result = interests;
             }
@@ -58,11 +58,30 @@ function getInterests(date) {
         return result;
     });
 }
+function getInternationals(date) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let result = [];
+        while (result.length === 0) {
+            const historyCheck = yield db.checkHistory(date);
+            if (historyCheck.international == null) {
+                let internationals = yield bankAPI.getInternational(date);
+                yield db.setInternational(internationals, date);
+                yield db.setHistory({ international: internationals.length > 0 }, date);
+                result = internationals;
+            }
+            else if (historyCheck.international == true) {
+                let internationals = yield db.getInternational(date);
+                result = internationals;
+            }
+            date.setDate(date.getDate() - 1);
+        }
+        return result;
+    });
+}
 router.get('/exchange', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const date = new Date('2022.08.16');
+    const date = new Date('2022.08.19');
     let todaysExchanges = yield getExchanges(date);
     let prevsExchanges = yield getExchanges(date);
-    console.log(todaysExchanges);
     res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8;' });
     res.write(JSON.stringify(todaysExchanges.length));
     res.write('<br/>----------------------------------<br/>');
@@ -70,10 +89,17 @@ router.get('/exchange', (req, res) => __awaiter(void 0, void 0, void 0, function
     res.end();
 }));
 router.get('/interest', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const date = new Date('2022.08.16');
+    const date = new Date('2022.08.18');
     let interests = yield getInterests(date);
     res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8;' });
-    res.write(JSON.stringify(interests).length);
+    res.write(JSON.stringify(interests.length));
+    res.end();
+}));
+router.get('/international', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const date = new Date('2022.08.19');
+    let internationals = yield getInternationals(date);
+    res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8;' });
+    res.write(JSON.stringify(internationals.length));
     res.end();
 }));
 exports.default = router;

@@ -1,6 +1,10 @@
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 import { getDateStr } from "../utils/date";
+import Exchange, { IExchange } from "../models/Exchange";
+import Interest, { IInterest } from "../models/Interest";
+import International, { IInternational } from "../models/International";
+
 dotenv.config();
 
 class DB {
@@ -22,7 +26,7 @@ class DB {
       WHERE date = '${dateStr}';
     `) as mysql.RowDataPacket[][];
 
-    const arr = response[0] as Api_History[]; 
+    const arr = response[0]; 
 
     if (arr.length === 0) {
       await this.pool.query(`
@@ -36,7 +40,7 @@ class DB {
         date: date
       };
     } else {
-      return arr[0];
+      return arr[0] as Api_History;
     }
   }
 
@@ -44,18 +48,22 @@ class DB {
     const dateStr = getDateStr(date);
 
     const history = await this.checkHistory(date);
+    console.log(history);
 
-    const boolToStr = (bool: boolean|null) => {
+    const boolToStr = (bool: boolean|number|null) => {
       switch (bool) {
         case null :
           return 'NULL';
         case true :
+        case 1:
           return 'true';
         case false:
+        case 0:
           return 'false';
       }
     }
-
+    console.log(history.exchange, history.interest, history.international)
+    console.log(exchange, interest, international);
     await this.pool.query(`
       UPDATE api_history
       SET exchange = ${boolToStr(exchange == undefined ? history.exchange : exchange)},
@@ -74,9 +82,9 @@ class DB {
       WHERE date = '${dateStr}';
     `) as mysql.RowDataPacket[][];
 
-    const result = response[0] as Exchange[];
+    const data = response[0] as IExchange[];
 
-    return result;
+    return data.map(ie => new Exchange(ie));
   }
 
   async getInterest(date: Date): Promise<Interest[]> {
@@ -87,11 +95,23 @@ class DB {
       WHERE date = '${dateStr}';
     `) as mysql.RowDataPacket[][];
 
-    const result = response[0] as Interest[];
+    const data = response[0] as IInterest[];
 
-    return result;
+    return data.map(ii => new Interest(ii));
   }
 
+  async getInternational(date: Date): Promise<International[]> {
+    const dateStr = getDateStr(date);
+
+    const response = await this.pool.query(`
+      SELECT * FROM international
+      WHERE date = '${dateStr}';
+    `) as mysql.RowDataPacket[][];
+
+    const data = response[0] as IInternational[];
+
+    return data.map(ii => new International(ii));
+  }
 
 
   async setExchanges(exchanges: Exchange[], date: Date) {
@@ -101,10 +121,9 @@ class DB {
     let progress = 1;
     
     exchanges.forEach(async (exc) => {
-      const deal_bas_r = Number(exc.deal_bas_r.replace(',', ''));
       await this.pool.query(`
         INSERT INTO exchange(cur_unit, deal_bas_r, cur_nm, date)
-        VALUES('${exc.cur_unit}', '${deal_bas_r}', '${exc.cur_nm}', '${dateStr}');
+        VALUES('${exc.curUnit}', '${exc.dealBasR}', '${exc.curNm}', '${dateStr}');
       `);
       console.log(`set exchanges to mysql (${progress}/${numOfJob})`);
       progress++;
@@ -118,27 +137,25 @@ class DB {
     let progress = 1;
 
     interests.forEach(async (inte, i) => {
-      const int_r = Number(inte.int_r);
       await this.pool.query(`
         INSERT INTO interest(idx, sfln_intrc_nm, int_r, date)
-        VALUES(${i}, '${inte.sfln_intrc_nm}', '${int_r}', '${dateStr}');
+        VALUES(${i}, '${inte.sflnIntrcNm}', '${inte.intR}', '${dateStr}');
       `);
       console.log(`set interest to mysql (${progress}/${numOfJob})`);
       progress++;
     })
   }
 
-  async setInternational(international: CIRR[], date: Date) {
+  async setInternational(international: International[], date: Date) {
     const dateStr = getDateStr(date);
 
     const numOfJob = international.length;
     let progress = 1;
 
-    international.forEach(async (cirr) => {
-      const int_r = Number(cirr.int_r);
+    international.forEach(async (inte) => {
       await this.pool.query(`
         INSERT INTO international(cur_fund, sfln_intrc_nm, int_r, date)
-        VALUES('${cirr.cur_fund}', '${cirr.sfln_intrc_nm}', '${int_r}', '${dateStr}');
+        VALUES('${inte.curFund}', '${inte.sflnIntrcNm}', '${inte.intR}', '${dateStr}');
       `);
       console.log(`set international to mysql (${progress}/${numOfJob})`);
       progress++;

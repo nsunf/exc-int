@@ -15,6 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const promise_1 = __importDefault(require("mysql2/promise"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const date_1 = require("../utils/date");
+const Exchange_1 = __importDefault(require("../models/Exchange"));
+const Interest_1 = __importDefault(require("../models/Interest"));
+const International_1 = __importDefault(require("../models/International"));
 dotenv_1.default.config();
 class DB {
     constructor() {
@@ -54,16 +57,21 @@ class DB {
         return __awaiter(this, void 0, void 0, function* () {
             const dateStr = (0, date_1.getDateStr)(date);
             const history = yield this.checkHistory(date);
+            console.log(history);
             const boolToStr = (bool) => {
                 switch (bool) {
                     case null:
                         return 'NULL';
                     case true:
+                    case 1:
                         return 'true';
                     case false:
+                    case 0:
                         return 'false';
                 }
             };
+            console.log(history.exchange, history.interest, history.international);
+            console.log(exchange, interest, international);
             yield this.pool.query(`
       UPDATE api_history
       SET exchange = ${boolToStr(exchange == undefined ? history.exchange : exchange)},
@@ -81,8 +89,8 @@ class DB {
       LEFT JOIN flag ON flag.cur_unit = exchange.cur_unit
       WHERE date = '${dateStr}';
     `);
-            const result = response[0];
-            return result;
+            const data = response[0];
+            return data.map(ie => new Exchange_1.default(ie));
         });
     }
     getInterest(date) {
@@ -92,8 +100,19 @@ class DB {
       SELECT * FROM interest
       WHERE date = '${dateStr}';
     `);
-            const result = response[0];
-            return result;
+            const data = response[0];
+            return data.map(ii => new Interest_1.default(ii));
+        });
+    }
+    getInternational(date) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const dateStr = (0, date_1.getDateStr)(date);
+            const response = yield this.pool.query(`
+      SELECT * FROM international
+      WHERE date = '${dateStr}';
+    `);
+            const data = response[0];
+            return data.map(ii => new International_1.default(ii));
         });
     }
     setExchanges(exchanges, date) {
@@ -102,10 +121,9 @@ class DB {
             const numOfJob = exchanges.length;
             let progress = 1;
             exchanges.forEach((exc) => __awaiter(this, void 0, void 0, function* () {
-                const deal_bas_r = Number(exc.deal_bas_r.replace(',', ''));
                 yield this.pool.query(`
         INSERT INTO exchange(cur_unit, deal_bas_r, cur_nm, date)
-        VALUES('${exc.cur_unit}', '${deal_bas_r}', '${exc.cur_nm}', '${dateStr}');
+        VALUES('${exc.curUnit}', '${exc.dealBasR}', '${exc.curNm}', '${dateStr}');
       `);
                 console.log(`set exchanges to mysql (${progress}/${numOfJob})`);
                 progress++;
@@ -118,10 +136,9 @@ class DB {
             const numOfJob = interests.length;
             let progress = 1;
             interests.forEach((inte, i) => __awaiter(this, void 0, void 0, function* () {
-                const int_r = Number(inte.int_r);
                 yield this.pool.query(`
         INSERT INTO interest(idx, sfln_intrc_nm, int_r, date)
-        VALUES(${i}, '${inte.sfln_intrc_nm}', '${int_r}', '${dateStr}');
+        VALUES(${i}, '${inte.sflnIntrcNm}', '${inte.intR}', '${dateStr}');
       `);
                 console.log(`set interest to mysql (${progress}/${numOfJob})`);
                 progress++;
@@ -133,11 +150,10 @@ class DB {
             const dateStr = (0, date_1.getDateStr)(date);
             const numOfJob = international.length;
             let progress = 1;
-            international.forEach((cirr) => __awaiter(this, void 0, void 0, function* () {
-                const int_r = Number(cirr.int_r);
+            international.forEach((inte) => __awaiter(this, void 0, void 0, function* () {
                 yield this.pool.query(`
         INSERT INTO international(cur_fund, sfln_intrc_nm, int_r, date)
-        VALUES('${cirr.cur_fund}', '${cirr.sfln_intrc_nm}', '${int_r}', '${dateStr}');
+        VALUES('${inte.curFund}', '${inte.sflnIntrcNm}', '${inte.intR}', '${dateStr}');
       `);
                 console.log(`set international to mysql (${progress}/${numOfJob})`);
                 progress++;

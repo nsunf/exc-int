@@ -15,6 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const date_1 = require("../utils/date");
+const Exchange_1 = __importDefault(require("../models/Exchange"));
+const Interest_1 = __importDefault(require("../models/Interest"));
+const International_1 = __importDefault(require("../models/International"));
 dotenv_1.default.config();
 class BankAPI {
     constructor() {
@@ -29,7 +32,9 @@ class BankAPI {
                     searchdate: (0, date_1.getDateStr)(date)
                 }
             });
-            return response.data;
+            console.log((0, date_1.getDateStr)(date) + " " + response.data.length);
+            const data = response.data;
+            return data.map(ie => new Exchange_1.default(ie));
         });
     }
     getInterest(date = new Date()) {
@@ -42,7 +47,8 @@ class BankAPI {
                     searchdate: (0, date_1.getDateStr)(date)
                 }
             });
-            return response.data;
+            const data = response.data;
+            return data.map(ii => new Interest_1.default(ii));
         });
     }
     getInternational(date = new Date()) {
@@ -55,7 +61,8 @@ class BankAPI {
                     searchdate: (0, date_1.getDateStr)(date)
                 }
             });
-            return response.data.cirr_list;
+            const data = response.data;
+            return data.cirr_list.map(ii => new International_1.default(ii));
         });
     }
 }

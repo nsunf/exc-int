@@ -1,6 +1,9 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import { getDateStr } from '../utils/date';
+import Exchange, { IExchange } from "../models/Exchange";
+import Interest, { IInterest } from "../models/Interest";
+import International, { IInternational } from "../models/International";
 
 dotenv.config();
 
@@ -20,8 +23,10 @@ class BankAPI {
         searchdate: getDateStr(date)
       }
     });
+    console.log(getDateStr(date) + " " + response.data.length)
+    const data = response.data as IExchange[];
 
-    return response.data;
+    return data.map(ie => new Exchange(ie));
   }
 
   async getInterest(date: Date = new Date()): Promise<Interest[]> {
@@ -34,10 +39,12 @@ class BankAPI {
       }
     });
 
-    return response.data;
+    const data = response.data as IInterest[];
+
+    return data.map(ii => new Interest(ii));
   }
 
-  async getInternational(date: Date = new Date()): Promise<CIRR[]> {
+  async getInternational(date: Date = new Date()): Promise<International[]> {
     const response = await axios({
       url: BankAPI.url + "internationalJSON",
       params: {
@@ -47,7 +54,9 @@ class BankAPI {
       }
     });
 
-    return (response.data as RawInternational).cirr_list;
+    const data = response.data as { cirr_list: IInternational[] };
+
+    return data.cirr_list.map(ii => new International(ii));
   }
 }
 

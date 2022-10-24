@@ -3,6 +3,9 @@ import DB from "../services/DB";
 import BankAPI from "../services/BankAPI";
 
 import { getDateStr } from '../utils/date';
+import Exchange from "../models/Exchange";
+import Interest from "../models/Interest";
+import International from "../models/International";
 
 const router = express.Router();
 
@@ -42,7 +45,7 @@ async function getInterests(date: Date) {
       await db.setInterest(interests, date);
       await db.setHistory({ interest: interests.length > 0 }, date);
       result = interests;
-    } else if (historyCheck.exchange == true) {
+    } else if (historyCheck.interest == true) {
       let interests = await db.getInterest(date);
       result = interests;
     }
@@ -53,13 +56,33 @@ async function getInterests(date: Date) {
   return result;
 }
 
+async function getInternationals(date: Date) {
+  let result: International[] = [];
+
+  while (result.length === 0) {
+    const historyCheck = await db.checkHistory(date);
+
+    if (historyCheck.international == null) {
+      let internationals = await bankAPI.getInternational(date);
+      await db.setInternational(internationals, date);
+      await db.setHistory({ international: internationals.length > 0 }, date);
+      result = internationals
+    } else if (historyCheck.international == true) {
+      let internationals = await db.getInternational(date);
+      result = internationals;
+    }
+
+    date.setDate(date.getDate() - 1);
+  }
+
+  return result;
+}
+
 router.get('/exchange', async (req, res) => {
-  const date = new Date('2022.08.16');
+  const date = new Date('2022.08.19');
 
   let todaysExchanges = await getExchanges(date); 
   let prevsExchanges = await getExchanges(date); 
-
-  console.log(todaysExchanges);
 
   res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8;' });
   res.write(JSON.stringify(todaysExchanges.length));
@@ -69,12 +92,22 @@ router.get('/exchange', async (req, res) => {
 })
 
 router.get('/interest', async (req, res) => {
-  const date = new Date('2022.08.16');
+  const date = new Date('2022.08.18');
 
   let interests = await getInterests(date);
 
   res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8;' });
-  res.write(JSON.stringify(interests).length);
+  res.write(JSON.stringify(interests.length));
+  res.end();
+})
+
+router.get('/international', async (req, res) => {
+  const date = new Date('2022.08.19');
+
+  let internationals = await getInternationals(date);
+
+  res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8;' });
+  res.write(JSON.stringify(internationals.length));
   res.end();
 })
 
