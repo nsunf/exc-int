@@ -30,7 +30,7 @@ class DB {
     }
     checkHistory(date) {
         return __awaiter(this, void 0, void 0, function* () {
-            const dateStr = (0, date_1.getDateStr)(date);
+            const dateStr = (0, date_1.getDateStr)(date, true);
             const response = yield this.pool.query(`
       SELECT * FROM api_history
       WHERE date = '${dateStr}';
@@ -49,15 +49,25 @@ class DB {
                 };
             }
             else {
-                return arr[0];
+                const history = arr[0];
+                return history;
             }
         });
     }
-    setHistory({ exchange, interest, international }, date) {
+    setHistory(type, bool, date) {
         return __awaiter(this, void 0, void 0, function* () {
+            let { exchange, interest, international } = {};
+            if (type == "Exchange") {
+                exchange = bool;
+            }
+            else if (type == "Interest") {
+                interest = bool;
+            }
+            else {
+                international = bool;
+            }
             const dateStr = (0, date_1.getDateStr)(date);
             const history = yield this.checkHistory(date);
-            console.log(history);
             const boolToStr = (bool) => {
                 switch (bool) {
                     case null:
@@ -70,8 +80,6 @@ class DB {
                         return 'false';
                 }
             };
-            console.log(history.exchange, history.interest, history.international);
-            console.log(exchange, interest, international);
             yield this.pool.query(`
       UPDATE api_history
       SET exchange = ${boolToStr(exchange == undefined ? history.exchange : exchange)},
@@ -81,83 +89,84 @@ class DB {
     `);
         });
     }
-    getExchanges(date) {
+    getData(type, date) {
         return __awaiter(this, void 0, void 0, function* () {
             const dateStr = (0, date_1.getDateStr)(date);
-            const response = yield this.pool.query(`
-      SELECT flag.flag, exchange.cur_unit, deal_bas_r, cur_nm, date FROM exchange
-      LEFT JOIN flag ON flag.cur_unit = exchange.cur_unit
-      WHERE date = '${dateStr}';
-    `);
-            const data = response[0];
-            return data.map(ie => new Exchange_1.default(ie));
+            let query = "";
+            switch (type) {
+                case "Exchange":
+                    query = `
+          SELECT flag.flag, exchange.cur_unit, deal_bas_r, cur_nm, date FROM exchange
+          LEFT JOIN flag ON flag.cur_unit = exchange.cur_unit
+          WHERE date = '${dateStr}';
+        `;
+                    break;
+                case "Interest":
+                    query = `
+          SELECT * FROM interest
+          WHERE date = '${dateStr}';
+        `;
+                    break;
+                case "International":
+                    query = `
+          SELECT flag.flag, cur_fund, sfln_intrc_nm, int_r, date
+          FROM international
+          JOIN flag
+          ON flag.cur_unit LIKE CONCAT('%', international.cur_fund, '%')
+          WHERE date = '${dateStr}';
+        `;
+                    break;
+            }
+            const response = yield this.pool.query(query);
+            switch (type) {
+                case 'Exchange':
+                    const exc = response[0];
+                    return exc.map(e => new Exchange_1.default(e));
+                case 'Interest':
+                    const itr = response[0];
+                    return itr.map(e => new Interest_1.default(e));
+                case 'International':
+                    const itn = response[0];
+                    return itn.map(e => new International_1.default(e));
+            }
         });
     }
-    getInterest(date) {
+    setData(data, type, date) {
         return __awaiter(this, void 0, void 0, function* () {
             const dateStr = (0, date_1.getDateStr)(date);
-            const response = yield this.pool.query(`
-      SELECT * FROM interest
-      WHERE date = '${dateStr}';
-    `);
-            const data = response[0];
-            return data.map(ii => new Interest_1.default(ii));
-        });
-    }
-    getInternational(date) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const dateStr = (0, date_1.getDateStr)(date);
-            const response = yield this.pool.query(`
-      SELECT * FROM international
-      WHERE date = '${dateStr}';
-    `);
-            const data = response[0];
-            return data.map(ii => new International_1.default(ii));
-        });
-    }
-    setExchanges(exchanges, date) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const dateStr = (0, date_1.getDateStr)(date);
-            const numOfJob = exchanges.length;
-            let progress = 1;
-            exchanges.forEach((exc) => __awaiter(this, void 0, void 0, function* () {
-                yield this.pool.query(`
-        INSERT INTO exchange(cur_unit, deal_bas_r, cur_nm, date)
-        VALUES('${exc.curUnit}', '${exc.dealBasR}', '${exc.curNm}', '${dateStr}');
-      `);
-                console.log(`set exchanges to mysql (${progress}/${numOfJob})`);
+            const numOfJob = data.length;
+            let progress = 0;
+            for (let i = 0; i < data.length; i++) {
+                let query = "";
+                switch (type) {
+                    case "Exchange":
+                        const exc = data[i];
+                        query = `
+            INSERT INTO exchange(cur_unit, deal_bas_r, cur_nm, date)
+            VALUES('${exc.getCurUnit}', '${exc.getDealBasR}', '${exc.getCurNm}', '${dateStr}');
+          `;
+                        break;
+                    case "Interest":
+                        const itr = data[i];
+                        query = `
+            INSERT INTO interest(idx, sfln_intrc_nm, int_r, date)
+            VALUES(${i}, '${itr.getSflnIntrcNm}', '${itr.getIntR}', '${dateStr}');
+          `;
+                        break;
+                    case "International":
+                        const itn = data[i];
+                        query = `
+            INSERT INTO international(cur_fund, sfln_intrc_nm, int_r, date)
+            VALUES('${itn.getCurFund}', '${itn.getSflnIntrcNm}', '${itn.getIntR}', '${dateStr}');
+          `;
+                        break;
+                }
+                yield this.pool.query(query);
                 progress++;
-            }));
-        });
-    }
-    setInterest(interests, date) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const dateStr = (0, date_1.getDateStr)(date);
-            const numOfJob = interests.length;
-            let progress = 1;
-            interests.forEach((inte, i) => __awaiter(this, void 0, void 0, function* () {
-                yield this.pool.query(`
-        INSERT INTO interest(idx, sfln_intrc_nm, int_r, date)
-        VALUES(${i}, '${inte.sflnIntrcNm}', '${inte.intR}', '${dateStr}');
-      `);
-                console.log(`set interest to mysql (${progress}/${numOfJob})`);
-                progress++;
-            }));
-        });
-    }
-    setInternational(international, date) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const dateStr = (0, date_1.getDateStr)(date);
-            const numOfJob = international.length;
-            let progress = 1;
-            international.forEach((inte) => __awaiter(this, void 0, void 0, function* () {
-                yield this.pool.query(`
-        INSERT INTO international(cur_fund, sfln_intrc_nm, int_r, date)
-        VALUES('${inte.curFund}', '${inte.sflnIntrcNm}', '${inte.intR}', '${dateStr}');
-      `);
-                console.log(`set international to mysql (${progress}/${numOfJob})`);
-                progress++;
-            }));
+            }
+            console.log(numOfJob === progress ?
+                `${progress}/${numOfJob} ${type} succeed` :
+                `${progress}/${numOfJob} ${type} stopped`);
         });
     }
 }

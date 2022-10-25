@@ -2,30 +2,48 @@ export interface IInternational {
   cur_fund: string;
   sfln_intrc_nm: string;
   int_r: string | number;
+  flag?: string;
+  date?: Date | string;
 }
 
-export default class International {
-  private _cur_fund: string;
-  private _sfln_intrc_nm: string;
-  private _int_r: number;
+export default class International implements IData {
+  private cur_fund: string;
+  private sfln_intrc_nm: string;
+  private int_r: number;
+  private flag?: string;
+  private date?: Date;
 
-  public constructor({ cur_fund, sfln_intrc_nm, int_r }: IInternational) {
-    this._cur_fund = cur_fund;
-    this._sfln_intrc_nm = sfln_intrc_nm;
-    if (typeof int_r === 'string') {
-      this._int_r = parseFloat(int_r);
+  public constructor({ cur_fund, sfln_intrc_nm, int_r, flag, date }: IInternational) {
+    this.cur_fund = cur_fund;
+    this.sfln_intrc_nm = sfln_intrc_nm;
+    this.flag = flag;
+
+    if (typeof int_r == 'string') {
+      this.int_r = parseFloat(int_r);
     } else {
-      this._int_r = int_r;
+      this.int_r = int_r;
+    }
+
+    if (typeof date == 'string') {
+      this.date = new Date(date);
+    } else {
+      this.date = date;
     }
   }
 
-  public get curFund(): string {
-    return this._cur_fund;
+  public get getCurFund(): string {
+    return this.cur_fund;
   }
-  public get sflnIntrcNm(): string {
-    return this._sfln_intrc_nm;
+  public get getSflnIntrcNm(): string {
+    return this.sfln_intrc_nm;
   }
-  public get intR(): number {
-    return this._int_r;
+  public get getIntR(): number {
+    return this.int_r;
+  }
+  public get getFlag(): string | undefined {
+    return this.flag;
+  }
+  public get getDate(): Date | undefined {
+    return this.date;
   }
 }

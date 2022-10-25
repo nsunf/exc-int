@@ -11,52 +11,49 @@ class BankAPI {
   static url = "https://www.koreaexim.go.kr/site/program/financial/";
 
   constructor() {
-
   }
 
-  async getExchange(date: Date = new Date()): Promise<Exchange[]> {
+  async getData(type: DataType, date: Date = new Date()): Promise<IData[]> {
+    let urlParam = BankAPI.url;
+    let dataParam = "AP0";
+
+    switch (type) {
+      case 'Exchange':
+        urlParam += "exchangeJSON";
+        dataParam += "1";
+        break;
+      case 'Interest':
+        urlParam += "interestJSON";
+        dataParam += "2";
+        break;
+      case 'International':
+        urlParam += "internationalJSON";
+        dataParam += "3";
+        break;
+    }
+
     const response = await axios({
-      url: BankAPI.url + "exchangeJSON",
+      url: urlParam,
       params: {
         authkey: process.env.API_AUTH_KEY,
-        data: "AP01",
-        searchdate: getDateStr(date)
-      }
-    });
-    console.log(getDateStr(date) + " " + response.data.length)
-    const data = response.data as IExchange[];
-
-    return data.map(ie => new Exchange(ie));
-  }
-
-  async getInterest(date: Date = new Date()): Promise<Interest[]> {
-    const response = await axios({
-      url: BankAPI.url + "interestJSON",
-      params: {
-        authkey: process.env.API_AUTH_KEY,
-        data: "AP02",
-        searchdate: getDateStr(date)
-      }
-    });
-
-    const data = response.data as IInterest[];
-
-    return data.map(ii => new Interest(ii));
-  }
-
-  async getInternational(date: Date = new Date()): Promise<International[]> {
-    const response = await axios({
-      url: BankAPI.url + "internationalJSON",
-      params: {
-        authkey: process.env.API_AUTH_KEY,
-        data: "AP03",
+        data: dataParam,
         searchdate: getDateStr(date)
       }
     });
 
-    const data = response.data as { cirr_list: IInternational[] };
+    console.log(`${getDateStr(date, true)} ${type} data(${response.data.length}) received from BankAPI`);
 
-    return data.cirr_list.map(ii => new International(ii));
+    switch (type) {
+      case 'Exchange':
+        const ex = response.data as IExchange[];
+        return ex.map(e => new Exchange(e));
+      case 'Interest':
+        const itr = response.data as IInterest[];
+        return itr.map(e => new Interest(e));
+      case 'International':
+        const itn = response.data as { cirr_list: IInternational[] };
+        return itn.cirr_list.map((e) => new International(e));
+    }
   }
 }
 

@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import axios from "axios";
 import styled from "styled-components";
 
 import Aside from "./components/Aside";
@@ -20,8 +22,18 @@ const AppBlock = styled.div`
 `;
 
 function App() {
+  useEffect(() => {
+    console.log('hoho')
+    axios.post('/api/exchange', {
+      searchdate: '2022.10.14'
+    }).then(res => {
+      // console.log(res);
+    })
+
+  }, []);
+
   return (
-    <AppBlock>
+   <AppBlock>
       <Aside />
       <Body />
     </AppBlock>

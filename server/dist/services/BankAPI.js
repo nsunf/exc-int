@@ -22,47 +22,44 @@ dotenv_1.default.config();
 class BankAPI {
     constructor() {
     }
-    getExchange(date = new Date()) {
+    getData(type, date = new Date()) {
         return __awaiter(this, void 0, void 0, function* () {
+            let urlParam = BankAPI.url;
+            let dataParam = "AP0";
+            switch (type) {
+                case 'Exchange':
+                    urlParam += "exchangeJSON";
+                    dataParam += "1";
+                    break;
+                case 'Interest':
+                    urlParam += "interestJSON";
+                    dataParam += "2";
+                    break;
+                case 'International':
+                    urlParam += "internationalJSON";
+                    dataParam += "3";
+                    break;
+            }
             const response = yield (0, axios_1.default)({
-                url: BankAPI.url + "exchangeJSON",
+                url: urlParam,
                 params: {
                     authkey: process.env.API_AUTH_KEY,
-                    data: "AP01",
+                    data: dataParam,
                     searchdate: (0, date_1.getDateStr)(date)
                 }
             });
-            console.log((0, date_1.getDateStr)(date) + " " + response.data.length);
-            const data = response.data;
-            return data.map(ie => new Exchange_1.default(ie));
-        });
-    }
-    getInterest(date = new Date()) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const response = yield (0, axios_1.default)({
-                url: BankAPI.url + "interestJSON",
-                params: {
-                    authkey: process.env.API_AUTH_KEY,
-                    data: "AP02",
-                    searchdate: (0, date_1.getDateStr)(date)
-                }
-            });
-            const data = response.data;
-            return data.map(ii => new Interest_1.default(ii));
-        });
-    }
-    getInternational(date = new Date()) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const response = yield (0, axios_1.default)({
-                url: BankAPI.url + "internationalJSON",
-                params: {
-                    authkey: process.env.API_AUTH_KEY,
-                    data: "AP03",
-                    searchdate: (0, date_1.getDateStr)(date)
-                }
-            });
-            const data = response.data;
-            return data.cirr_list.map(ii => new International_1.default(ii));
+            console.log(`${(0, date_1.getDateStr)(date, true)} ${type} data(${response.data.length}) received from BankAPI`);
+            switch (type) {
+                case 'Exchange':
+                    const ex = response.data;
+                    return ex.map(e => new Exchange_1.default(e));
+                case 'Interest':
+                    const itr = response.data;
+                    return itr.map(e => new Interest_1.default(e));
+                case 'International':
+                    const itn = response.data;
+                    return itn.cirr_list.map((e) => new International_1.default(e));
+            }
         });
     }
 }

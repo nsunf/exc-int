@@ -19,14 +19,14 @@ class DB {
   }
 
   async checkHistory(date: Date): Promise<Api_History> {
-    const dateStr = getDateStr(date);
+    const dateStr = getDateStr(date, true);
 
     const response = await this.pool.query(`
       SELECT * FROM api_history
       WHERE date = '${dateStr}';
     `) as mysql.RowDataPacket[][];
 
-    const arr = response[0]; 
+    const arr = response[0];
 
     if (arr.length === 0) {
       await this.pool.query(`
@@ -40,15 +40,24 @@ class DB {
         date: date
       };
     } else {
-      return arr[0] as Api_History;
+      const history = arr[0] as Api_History; 
+      return history;
     }
   }
 
-  async setHistory({ exchange, interest, international }: { exchange?: boolean, interest?: boolean, international?: boolean}, date: Date) {
+  async setHistory(type: DataType, bool: boolean, date: Date) {
+    let { exchange, interest, international }: { exchange?: boolean, interest?: boolean, international?: boolean } = {};
+    if (type == "Exchange") {
+      exchange = bool;
+    } else if (type == "Interest") {
+      interest = bool;
+    } else {
+      international = bool;
+    }
+
     const dateStr = getDateStr(date);
 
     const history = await this.checkHistory(date);
-    console.log(history);
 
     const boolToStr = (bool: boolean|number|null) => {
       switch (bool) {
@@ -62,8 +71,7 @@ class DB {
           return 'false';
       }
     }
-    console.log(history.exchange, history.interest, history.international)
-    console.log(exchange, interest, international);
+
     await this.pool.query(`
       UPDATE api_history
       SET exchange = ${boolToStr(exchange == undefined ? history.exchange : exchange)},
@@ -73,111 +81,94 @@ class DB {
     `);
   }
 
-  async getExchanges(date: Date): Promise<Exchange[]> {
+  async getData(type: DataType, date: Date): Promise<IData[]> {
     const dateStr = getDateStr(date);
 
-    const response = await this.pool.query(`
-      SELECT flag.flag, exchange.cur_unit, deal_bas_r, cur_nm, date FROM exchange
-      LEFT JOIN flag ON flag.cur_unit = exchange.cur_unit
-      WHERE date = '${dateStr}';
-    `) as mysql.RowDataPacket[][];
+    let query = "";
 
-    const data = response[0] as IExchange[];
+    switch (type) {
+      case "Exchange":
+        query = `
+          SELECT flag.flag, exchange.cur_unit, deal_bas_r, cur_nm, date FROM exchange
+          LEFT JOIN flag ON flag.cur_unit = exchange.cur_unit
+          WHERE date = '${dateStr}';
+        `;
+        break;
+      case "Interest":
+        query = `
+          SELECT * FROM interest
+          WHERE date = '${dateStr}';
+        `;
+        break;
+      case "International":
+        query = `
+          SELECT flag.flag, cur_fund, sfln_intrc_nm, int_r, date
+          FROM international
+          JOIN flag
+          ON flag.cur_unit LIKE CONCAT('%', international.cur_fund, '%')
+          WHERE date = '${dateStr}';
+        `;
+        break;
+    }
 
-    return data.map(ie => new Exchange(ie));
+    const response = await this.pool.query(query) as mysql.RowDataPacket[][];
+
+    switch (type) {
+      case 'Exchange':
+        const exc = response[0] as IExchange[];
+        return exc.map(e => new Exchange(e)); 
+      case 'Interest':
+        const itr = response[0] as IInterest[];
+        return itr.map(e => new Interest(e));
+      case 'International':
+        const itn = response[0] as IInternational[];
+        return itn.map(e => new International(e));
+    }
   }
 
-  async getInterest(date: Date): Promise<Interest[]> {
+  async setData(data: IData[], type: DataType, date: Date) {
     const dateStr = getDateStr(date);
 
-    const response = await this.pool.query(`
-      SELECT * FROM interest
-      WHERE date = '${dateStr}';
-    `) as mysql.RowDataPacket[][];
+    const numOfJob = data.length;
+    let progress = 0;
 
-    const data = response[0] as IInterest[];
+    for (let i = 0; i < data.length; i++) {
+      let query = "";
 
-    return data.map(ii => new Interest(ii));
-  }
+      switch (type) {
+        case "Exchange":
+          const exc = data[i] as Exchange;
+          query = `
+            INSERT INTO exchange(cur_unit, deal_bas_r, cur_nm, date)
+            VALUES('${exc.getCurUnit}', '${exc.getDealBasR}', '${exc.getCurNm}', '${dateStr}');
+          `;
+          break;
+        case "Interest":
+          const itr = data[i] as Interest;
+          query = `
+            INSERT INTO interest(idx, sfln_intrc_nm, int_r, date)
+            VALUES(${i}, '${itr.getSflnIntrcNm}', '${itr.getIntR}', '${dateStr}');
+          `;
+          break;
+        case "International":
+          const itn = data[i] as International;
+          query = `
+            INSERT INTO international(cur_fund, sfln_intrc_nm, int_r, date)
+            VALUES('${itn.getCurFund}', '${itn.getSflnIntrcNm}', '${itn.getIntR}', '${dateStr}');
+          `;
+          break;
+      }
 
-  async getInternational(date: Date): Promise<International[]> {
-    const dateStr = getDateStr(date);
-
-    const response = await this.pool.query(`
-      SELECT * FROM international
-      WHERE date = '${dateStr}';
-    `) as mysql.RowDataPacket[][];
-
-    const data = response[0] as IInternational[];
-
-    return data.map(ii => new International(ii));
-  }
-
-
-  async setExchanges(exchanges: Exchange[], date: Date) {
-    const dateStr = getDateStr(date);
-
-    const numOfJob = exchanges.length;
-    let progress = 1;
+      await this.pool.query(query);
+      progress++;
+    }
     
-    exchanges.forEach(async (exc) => {
-      await this.pool.query(`
-        INSERT INTO exchange(cur_unit, deal_bas_r, cur_nm, date)
-        VALUES('${exc.curUnit}', '${exc.dealBasR}', '${exc.curNm}', '${dateStr}');
-      `);
-      console.log(`set exchanges to mysql (${progress}/${numOfJob})`);
-      progress++;
-    })
+    console.log(
+      numOfJob === progress ?
+        `${progress}/${numOfJob} ${type} succeed` :
+        `${progress}/${numOfJob} ${type} stopped`
+    )
   }
-
-  async setInterest(interests: Interest[], date: Date) {
-    const dateStr = getDateStr(date);
-
-    const numOfJob = interests.length;
-    let progress = 1;
-
-    interests.forEach(async (inte, i) => {
-      await this.pool.query(`
-        INSERT INTO interest(idx, sfln_intrc_nm, int_r, date)
-        VALUES(${i}, '${inte.sflnIntrcNm}', '${inte.intR}', '${dateStr}');
-      `);
-      console.log(`set interest to mysql (${progress}/${numOfJob})`);
-      progress++;
-    })
-  }
-
-  async setInternational(international: International[], date: Date) {
-    const dateStr = getDateStr(date);
-
-    const numOfJob = international.length;
-    let progress = 1;
-
-    international.forEach(async (inte) => {
-      await this.pool.query(`
-        INSERT INTO international(cur_fund, sfln_intrc_nm, int_r, date)
-        VALUES('${inte.curFund}', '${inte.sflnIntrcNm}', '${inte.intR}', '${dateStr}');
-      `);
-      console.log(`set international to mysql (${progress}/${numOfJob})`);
-      progress++;
-    })
-  }
-  // get exchange
-  // today
-  // week
-  // month
-  // year
-
-  // get interest
-  // today
-
-  // get international
-  // today
-
-  // if (no data) -> request api -> insert into db
-
-  // set exchange
-  // set interest
-  // set international
 }
 
 export default DB;

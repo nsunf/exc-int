@@ -9,4 +9,7 @@ const router = express_1.default.Router();
 router.get('/', (req, res) => {
     res.sendFile(path_1.default.resolve(__dirname, '../../client/build/index.html'));
 });
+router.get('/hoho', (req, res) => {
+    res.end('hohoho');
+});
 exports.default = router;
